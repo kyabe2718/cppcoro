@@ -330,7 +330,7 @@ namespace cppcoro
 	{
 	}
 
-	static_thread_pool::static_thread_pool(std::uint32_t threadCount)
+	static_thread_pool::static_thread_pool(std::uint32_t threadCount, bool runImmediately)
 		: m_threadCount(threadCount > 0 ? threadCount : 1)
 		, m_threadStates(std::make_unique<thread_state[]>(m_threadCount))
 		, m_stopRequested(false)
@@ -338,7 +338,13 @@ namespace cppcoro
 		, m_globalQueueTail(nullptr)
 		, m_sleepingThreadCount(0)
 	{
-		m_threads.reserve(threadCount);
+		if (runImmediately)
+			start();
+	}
+
+	void static_thread_pool::start()
+	{
+		m_threads.reserve(m_threadCount);
 		try
 		{
 			for (std::uint32_t i = 0; i < m_threadCount; ++i)
@@ -361,10 +367,7 @@ namespace cppcoro
 		}
 	}
 
-	static_thread_pool::~static_thread_pool()
-	{
-		shutdown();
-	}
+	static_thread_pool::~static_thread_pool() { /*shutdown();*/ }
 
 	void static_thread_pool::run_worker_thread(std::uint32_t threadIndex) noexcept
 	{
@@ -495,7 +498,7 @@ namespace cppcoro
 	{
 		m_stopRequested.store(true, std::memory_order_relaxed);
 
-		for (std::uint32_t i = 0; i < m_threads.size(); ++i)
+		for (std::uint32_t i = 0; i < m_threadCount; ++i)
 		{
 			auto& threadState = m_threadStates[i];
 

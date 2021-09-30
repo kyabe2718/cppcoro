@@ -27,7 +27,9 @@ namespace cppcoro
 		///
 		/// \param threadCount
 		/// The number of threads in the pool that will be used to execute work.
-		explicit static_thread_pool(std::uint32_t threadCount);
+		explicit static_thread_pool(std::uint32_t threadCount, bool runImmediately = true);
+
+		void start();
 
 		~static_thread_pool();
 
