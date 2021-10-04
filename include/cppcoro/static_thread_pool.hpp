@@ -36,29 +36,26 @@ namespace cppcoro
 		class schedule_operation
 		{
 		public:
-
-			schedule_operation(static_thread_pool* tp) noexcept : m_threadPool(tp) {}
+			schedule_operation(static_thread_pool* tp) noexcept
+				: m_threadPool(tp)
+			{
+			}
 
 			bool await_ready() noexcept { return false; }
 			void await_suspend(std::experimental::coroutine_handle<> awaitingCoroutine) noexcept;
 			void await_resume() noexcept {}
 
 		private:
-
 			friend class static_thread_pool;
 
 			static_thread_pool* m_threadPool;
 			std::experimental::coroutine_handle<> m_awaitingCoroutine;
 			schedule_operation* m_next;
-
 		};
 
 		std::uint32_t thread_count() const noexcept { return m_threadCount; }
 
-		[[nodiscard]]
-		schedule_operation schedule() noexcept { return schedule_operation{ this }; }
-
-	private:
+		[[nodiscard]] schedule_operation schedule() noexcept { return schedule_operation{ this }; }
 
 		friend class schedule_operation;
 
@@ -66,6 +63,7 @@ namespace cppcoro
 
 		void shutdown();
 
+	private:
 		void schedule_impl(schedule_operation* operation) noexcept;
 
 		void remote_enqueue(schedule_operation* operation) noexcept;
